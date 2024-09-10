@@ -24,4 +24,7 @@
             run: chmod +x gradlew
 
           - name: Build Release Apk
+            env:
+              GITHUB_USERNAME: ${{ secrets.SECRET_GITHUB_USERNAME }}
+              GITHUB_ACCESS_TOKEN: ${{ secrets.SECRET_GITHUB_ACCESS_TOKEN }}
             run: ./gradlew assembleRelease
