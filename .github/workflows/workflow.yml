@@ -2,7 +2,7 @@
   on:
     workflow_dispatch:
     push:
-        branches: [ develop ]
+        branches: [ develop, github_action_cicd ]
     pull_request:
         branches: [ develop ]
 
