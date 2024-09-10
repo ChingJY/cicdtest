@@ -1,11 +1,3 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
-//plugins {
-//    alias(libs.plugins.android.application) apply false
-//    alias(libs.plugins.jetbrains.kotlin.android) apply false
-//    alias(libs.plugins.android.library) apply false
-//}
-
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     buildCoreConfig()
     buildCredentials(
@@ -37,8 +29,9 @@ allprojects {
         mavenLocal()
         maven("https://jitpack.io")
         maven { url = uri("https://maven.pkg.github.com/voicetube/android-sdk-core"); credentials { username = CoreCredentials.GitHub.userName; password = CoreCredentials.GitHub.accessToken } }
-        jcenter()
     }
 }
 
-task<Delete>("clean") { delete(rootProject.buildDir) }
+task<Delete>("clean") {
+    delete(rootProject.layout.buildDirectory)
+}

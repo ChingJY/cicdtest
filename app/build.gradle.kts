@@ -12,8 +12,6 @@ repositories {
 }
 
 plugins {
-//    alias(libs.plugins.android.application)
-//    alias(libs.plugins.jetbrains.kotlin.android)
     id("com.android.application")
     id("kotlin-android")
     id("kotlin-kapt")
