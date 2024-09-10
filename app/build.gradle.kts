@@ -1,6 +1,26 @@
+buildscript {
+    repositories {
+        maven("https://plugins.gradle.org/m2/")
+    }
+}
+
+repositories {
+    maven("https://oss.sonatype.org/content/repositories/snapshots")
+    flatDir {
+        dirs("libs")
+    }
+}
+
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android)
+//    alias(libs.plugins.android.application)
+//    alias(libs.plugins.jetbrains.kotlin.android)
+    id("com.android.application")
+    id("kotlin-android")
+    id("kotlin-kapt")
+    id("voicetube-plugin-ndk")
+    id("voicetube-plugin-huawei-publishing")
+    id("com.plugin.cicd")
+    id("kotlin-parcelize")
 }
 
 android {
@@ -11,10 +31,19 @@ android {
         applicationId = "com.example.cicdtest"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = CoreConfig.App.versionCode
+        versionName = CoreConfig.App.versionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file(System.getenv("KEYSTORE_FILE") ?: "keystore.jks")
+            storePassword = System.getenv("KEYSTORE_PASSWORD")
+            keyAlias = System.getenv("KEY_ALIAS")
+            keyPassword = System.getenv("KEY_PASSWORD")
+        }
     }
 
     buildTypes {
