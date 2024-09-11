@@ -8,17 +8,27 @@
 
   jobs:
     build:
-        runs-on: macos-latest
+        runs-on: ${{ vars.RUNNING_HOST }}
+
+        env:
+          GITHUB_USERNAME: ${{ secrets.SECRET_GITHUB_USERNAME }}
+          GITHUB_ACCESS_TOKEN: ${{ secrets.SECRET_GITHUB_ACCESS_TOKEN }}
+          STORE_PASSWORD: ${{ secrets.KEYSTORE_KEY_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEYSTORE_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
+          HUAWEI_PUBLISHING_APP_ID: ${{ secrets.HUAWEI_PUBLISHING_APP_ID }}
+          HUAWEI_PUBLISHING_CLIENT_ID: ${{ secrets.HUAWEI_PUBLISHING_CLIENT_ID }}
+          HUAWEI_PUBLISHING_CLIENT_SECRET: ${{ secrets.HUAWEI_PUBLISHING_CLIENT_SECRET }}
 
         steps:
           - name: Check out project
             uses: actions/checkout@v3
 
-          - name: Setup JDK 17
+          - name: Setup JDK Version
             uses: actions/setup-java@v3
             with:
-              java-version: '17'
-              distribution: 'zulu'
+              java-version: ${{ vars.JAVA_VERSION }}
+              distribution: ${{ vars.JAVA_DISTRIBUTION }}
 
           - name: Grant execute permission for gradlew
             run: chmod +x gradlew
@@ -30,10 +40,4 @@
               echo $ENCODED_KEYSTORE | base64 -D > keystore.jks
 
           - name: Build Release Apk
-            env:
-              GITHUB_USERNAME: ${{ secrets.SECRET_GITHUB_USERNAME }}
-              GITHUB_ACCESS_TOKEN: ${{ secrets.SECRET_GITHUB_ACCESS_TOKEN }}
-              STORE_PASSWORD: ${{ secrets.KEYSTORE_KEY_STORE_PASSWORD }}
-              KEY_ALIAS: ${{ secrets.KEYSTORE_KEY_ALIAS }}
-              KEY_PASSWORD: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
             run: ./gradlew assembleRelease
