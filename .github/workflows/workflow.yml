@@ -99,11 +99,10 @@
             -out firebase-app-distribution-credential.json -d -md sha256
 
         - name: Upload Firebase Distribution credential
-          run: |
-            uses: actions/upload-artifact@v4
-            with:
-            name: firebase-app-distribution-credential.json
-            path: firebase-app-distribution-credential.json
+          uses: actions/upload-artifact@v4
+          with:
+              name: firebase-app-distribution-credential.json
+              path: firebase-app-distribution-credential.json
 
         - name: Generate file of commit message
           run: |
