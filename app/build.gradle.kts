@@ -22,6 +22,7 @@ plugins {
     id("voicetube-plugin-huawei-publishing")
     id("com.plugin.cicd")
     id("kotlin-parcelize")
+    id("com.google.firebase.appdistribution")
 }
 
 android {
@@ -65,6 +66,12 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("release")
+            firebaseAppDistribution {
+                artifactType = "APK"
+                releaseNotesFile = "commit.txt"
+                groups = "QA-Team"
+                serviceCredentialsFile = "firebase-app-distribution-credential.json"
+            }
         }
     }
     compileOptions {

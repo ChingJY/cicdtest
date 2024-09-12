@@ -47,10 +47,10 @@ object CoreConfig {
     }
 
     object App {
-        const val majorVersion: Int = 4
-        const val minorVersion: Int = 1
-        const val hotfixVersion: Int = 6
-        const val versionCode: Int = 551
+        const val majorVersion: Int = 1
+        const val minorVersion: Int = 0
+        const val hotfixVersion: Int = 0
+        const val versionCode: Int = 1
         val versionName: String = "$majorVersion.$minorVersion.$hotfixVersion.${simpleDateFormat.format(Date())}"
     }
 

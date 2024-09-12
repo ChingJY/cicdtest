@@ -14,6 +14,7 @@ buildscript {
         maven { url = uri("https://maven.pkg.github.com/voicetube/android-huawei-publishing-plugin"); credentials { username = CoreCredentials.GitHub.userName; password = CoreCredentials.GitHub.accessToken } }
     }
     dependencies {
+        classpath("com.google.firebase:firebase-appdistribution-gradle:5.0.0")
         classpath("com.google.gms:google-services:4.4.2")
         classpath(coreDependencyOf("com.voicetube.plugin:huawei-publishing"))
         classpath(coreDependencyOf("com.voicetube.plugin:ndk"))
