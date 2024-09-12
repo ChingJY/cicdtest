@@ -8,6 +8,7 @@
 
   jobs:
     build:
+        name: Build
         runs-on: ${{ vars.RUNNING_HOST }}
 
         env:
@@ -58,14 +59,13 @@
                 path: app/build/outputs/bundle/release/app-release.aab
 
           - name: Send notification to Google Chat
-            if: always()  # 這確保無論前面的步驟成功與否都會執行
-            uses: 8398a7/action-slack@v3
-            with:
-              status: ${{ job.status }}
-              text: |
-                Repository: ${{ github.repository }}
-                Workflow: ${{ github.workflow }}
-                Status: ${{ job.status }}
-                Commit: ${{ github.sha }}
-                Triggered by: ${{ github.actor }}
-              webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
+            if: always()
+            run: |
+              curl -X POST -H 'Content-Type: application/json' -d '{
+                "text": "Workflow 已完成！" + 
+                "\nStatus: ${{ job.status }}" + 
+                "\nRepository: ${{ github.repository }}" + 
+                "\nWorkflow: ${{ github.workflow }} " + 
+                "\nCommit: ${{ github.sha }}" + 
+                "\nTriggered by: ${{ github.actor }}"
+              }' '${{ secrets.GOOGLE_CHAT_WEBHOOK }}'
