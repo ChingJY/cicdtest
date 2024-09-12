@@ -60,13 +60,16 @@
 
           - name: Send notification to Google Chat
             if: always()
+            env:
+              MESSAGE: |
+                Workflow 已完成！
+                Status: ${{ job.status }}
+                Repository: ${{ github.repository }}
+                Workflow: ${{ github.workflow }}
+                Commit: ${{ github.sha }}
+                Triggered by: ${{ github.actor }}
             run: |
-              curl -X POST -H 'Content-Type: application/json' -d '{
-                "text": |
-                  Workflow 已完成！
-                    Status: ${{ job.status }}
-                    Repository: ${{ github.repository }}
-                    Workflow: ${{ github.workflow }}
-                    Commit: ${{ github.sha }}
-                    Triggered by: ${{ github.actor }}
-              }' '${{ secrets.GOOGLE_CHAT_WEBHOOK }}'
+              MESSAGE=$(echo "$MESSAGE" | awk '{printf "%s\\n", $0}' | sed 's/"/\\"/g')
+              curl -X POST -H 'Content-Type: application/json' -d "{
+                \"text\": \"$MESSAGE\"
+              }" '${{ secrets.GOOGLE_CHAT_WEBHOOK }}'
