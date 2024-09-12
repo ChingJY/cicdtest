@@ -73,63 +73,39 @@
               curl -X POST -H 'Content-Type: application/json' -d "{
                 \"text\": \"$MESSAGE\"
               }" '${{ secrets.GOOGLE_CHAT_WEBHOOK }}'
+              
+          - name: Decrypt Firebase Distribution credential
+            run: |
+              openssl enc -aes-256-cbc -k "${{ secrets.OPENSSL_PASSWORD }}" \
+              -in firebase-app-distribution-credential.json.enc \
+              -out firebase-app-distribution-credential.json -d -md sha256
 
-    distribution:
-      needs: build
-      name: Distribution
-      runs-on: ${{ vars.RUNNING_HOST }}
+          - name: Generate file of commit message
+            run: |
+              git show -s --format=%B > commit.txt
+              echo "save commit message to file commit.txt"
+              cat commit.txt
 
-      steps:
-        - name: Check out project
-          uses: actions/checkout@v3
+          - name: Download APK
+            uses: actions/download-artifact@v4
+            with:
+              name: app-release.apk
+              path: app/build/outputs/apk/release
 
-        - name: Setup JDK Version
-          uses: actions/setup-java@v3
-          with:
-            java-version: ${{ vars.JAVA_VERSION }}
-            distribution: ${{ vars.JAVA_DISTRIBUTION }}
+          - name: Upload to Firebase App Distribution
+            run: |
+              ./gradlew assembleRelease appDistributionUploadRelease
 
-        - name: Grant execute permission for gradlew
-          run: chmod +x gradlew
-
-        - name: Decrypt Firebase Distribution credential
-          run: |
-            openssl enc -aes-256-cbc -k "${{ secrets.OPENSSL_PASSWORD }}" \
-            -in firebase-app-distribution-credential.json.enc \
-            -out firebase-app-distribution-credential.json -d -md sha256
-
-        - name: Upload Firebase Distribution credential
-          uses: actions/upload-artifact@v4
-          with:
-              name: firebase-app-distribution-credential.json
-              path: firebase-app-distribution-credential.json
-
-        - name: Generate file of commit message
-          run: |
-            git show -s --format=%B > commit.txt
-            echo "save commit message to file commit.txt"
-            cat commit.txt
-
-        - name: Download APK
-          uses: actions/download-artifact@v4
-          with:
-            name: app-release.apk
-            path: app/build/outputs/apk/release
-
-        - name: Upload to Firebase App Distribution
-          run: |
-            ./gradlew appDistributionUploadRelease
-
-        - name: Send notification to Google Chat
-          if: always()
-          env:
-            MESSAGE: |
-              Upload App to Firebase App Distribution 已完成！
-              Status: ${{ job.status }}
-              Repository: ${{ github.repository }}
-              Triggered by: ${{ github.actor }}
-          run: |
-            MESSAGE=$(echo "$MESSAGE" | awk '{printf "%s\\n", $0}' | sed 's/"/\\"/g')
-            curl -X POST -H 'Content-Type: application/json' -d "{
-              \"text\": \"$MESSAGE\"
-            }" '${{ secrets.GOOGLE_CHAT_WEBHOOK }}'
+          - name: Send notification to Google Chat
+            if: always()
+            env:
+              MESSAGE: |
+                Upload App to Firebase App Distribution 已完成！
+                Status: ${{ job.status }}
+                Repository: ${{ github.repository }}
+                Triggered by: ${{ github.actor }}
+            run: |
+              MESSAGE=$(echo "$MESSAGE" | awk '{printf "%s\\n", $0}' | sed 's/"/\\"/g')
+              curl -X POST -H 'Content-Type: application/json' -d "{
+                \"text\": \"$MESSAGE\"
+              }" '${{ secrets.GOOGLE_CHAT_WEBHOOK }}'
