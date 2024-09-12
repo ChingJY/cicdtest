@@ -62,10 +62,11 @@
             if: always()
             run: |
               curl -X POST -H 'Content-Type: application/json' -d '{
-                "text": "Workflow 已完成！" + 
-                "\nStatus: ${{ job.status }}" + 
-                "\nRepository: ${{ github.repository }}" + 
-                "\nWorkflow: ${{ github.workflow }} " + 
-                "\nCommit: ${{ github.sha }}" + 
-                "\nTriggered by: ${{ github.actor }}"
+                "text": |
+                  Workflow 已完成！
+                    Status: ${{ job.status }}
+                    Repository: ${{ github.repository }}
+                    Workflow: ${{ github.workflow }}
+                    Commit: ${{ github.sha }}
+                    Triggered by: ${{ github.actor }}
               }' '${{ secrets.GOOGLE_CHAT_WEBHOOK }}'
