@@ -1,10 +1,10 @@
   name: CICD
   on:
     workflow_dispatch:
-    push:
-        branches: [ develop, github_action_cicd ]
-    pull_request:
-        branches: [ develop ]
+#    push:
+#        branches: [ develop, github_action_cicd ]
+#    pull_request:
+#        branches: [ develop ]
 
   env:
     GITHUB_USERNAME: ${{ secrets.SECRET_GITHUB_USERNAME }}
