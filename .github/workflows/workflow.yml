@@ -94,7 +94,7 @@
 
           - name: Upload to Firebase App Distribution
             run: |
-              ./gradlew assembleRelease appDistributionUploadRelease
+              ./gradlew appDistributionUploadRelease
 
           - name: Send notification to Google Chat
             if: always()
