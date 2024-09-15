@@ -1,4 +1,4 @@
-package com.example.cicdtest
+package com.yitianyitiandan.cicdtest
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
