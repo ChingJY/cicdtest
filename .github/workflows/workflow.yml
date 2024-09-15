@@ -86,12 +86,6 @@
               echo "save commit message to file commit.txt"
               cat commit.txt
 
-          - name: Download APK
-            uses: actions/download-artifact@v4
-            with:
-              name: app-release.apk
-              path: app/build/outputs/apk/release
-
           - name: Upload to Firebase App Distribution
             run: |
               ./gradlew appDistributionUploadRelease
