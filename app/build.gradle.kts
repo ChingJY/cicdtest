@@ -27,11 +27,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.cicdtest"
+    namespace = "com.yitianyitiandan.cicdtest"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.cicdtest"
+        applicationId = "com.yitianyitiandan.cicdtest"
         minSdk = 24
         targetSdk = 34
         versionCode = CoreConfig.App.versionCode
