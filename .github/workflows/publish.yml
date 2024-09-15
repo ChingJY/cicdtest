@@ -1,4 +1,4 @@
-name: Publish to Google Play
+name: Publish app to Google Play
 
 on:
   workflow_dispatch:
