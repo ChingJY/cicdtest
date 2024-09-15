@@ -26,7 +26,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: app-release.aab
-          path: app/build/outputs/bundle/release/
+          path: ./artifacts
 
       - name: Publish to Google Play
         uses: r0adkll/upload-google-play@v1
