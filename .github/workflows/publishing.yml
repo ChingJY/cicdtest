@@ -22,16 +22,40 @@ jobs:
           java-version: ${{ vars.JAVA_VERSION }}
           distribution: ${{ vars.JAVA_DISTRIBUTION }}
 
-      - name: Download AAB
-        uses: actions/download-artifact@v4
-        with:
-          name: app-release.aab
-          path: ./artifacts
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Get artifact download URL
+        id: get_artifact
+        run: |
+          TOKEN=${{ secrets.SECRET_GITHUB_USERNAME }}
+          REPO="${{ github.repository }}"
+          ARTIFACT_NAME="app-release.aab"
+
+          ARTIFACT_ID=$(curl -s -H "Authorization: token $TOKEN" \
+            "https://api.github.com/repos/$REPO/actions/artifacts" \
+            | jq '.artifacts[] | select(.name == "'"$ARTIFACT_NAME"'") | .id')
+
+          if [ -z "$ARTIFACT_ID" ]; then
+            echo "Artifact not found"
+            exit 1
+          fi
+
+          DOWNLOAD_URL=$(curl -s -H "Authorization: token $TOKEN" \
+            "https://api.github.com/repos/$REPO/actions/artifacts/$ARTIFACT_ID/zip" \
+            -D - -o /dev/null | grep -i '^location:' | cut -d ' ' -f 2 | tr -d '\r')
+
+          echo "download_url=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
+
+      - name: Download artifact
+        run: |
+          curl -L -o artifact.zip "${{ steps.get_artifact.outputs.download_url }}"
+          unzip artifact.zip -d ./artifact
 
       - name: Publish to Google Play
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_KEY }}
           packageName: com.yitianyitiandan.cicdtest
-          releaseFile: app/build/outputs/bundle/release/app-release.aab
+          releaseFile: ./artifact/app-release.aab
           track: alpha
