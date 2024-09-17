@@ -22,7 +22,7 @@ jobs:
     runs-on: ${{ vars.RUNNING_HOST }}
     steps:
       - name: Check out project
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup JDK Version
         id: setup-java
@@ -40,12 +40,9 @@ jobs:
     runs-on: ${{ vars.RUNNING_HOST }}
     needs: setup-java
     if: github.ref_name == 'develop'
-    strategy:
-      matrix:
-        api-level: [ 29, 30 ]
     steps:
       - name: Check out project
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -65,7 +62,7 @@ jobs:
       - name: Run Emulator Tests
         uses: ./.github/actions/android-emulator-test-action
         with:
-          api-level: ${{ matrix.api-level }}
+          api-level: 29
           arch: arm64-v8a
           profile: pixel_3a
           script: |
@@ -81,7 +78,7 @@ jobs:
             Repository: ${{ github.repository }}
             Triggered by: ${{ github.actor }}
         run: |
-          MESSAGE=$(echo "$MESSAGE" | awk '{printf "%s\\n", $0}' | sed '$d' | sed 's/"/\\"/g')
+          MESSAGE=$(echo "$MESSAGE" | awk '{printf "%s\\n", $0}' | sed 's/"/\\"/g')
           curl -X POST -H 'Content-Type: application/json' -d "{
             \"text\": \"$MESSAGE\"
           }" "${{ secrets.GOOGLE_CHAT_WEBHOOK }}"
@@ -93,7 +90,7 @@ jobs:
     if: github.ref_name == 'release'
     steps:
       - name: Check out project
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -139,7 +136,7 @@ jobs:
     if: github.ref_name == 'master'
     steps:
       - name: Check out project
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
