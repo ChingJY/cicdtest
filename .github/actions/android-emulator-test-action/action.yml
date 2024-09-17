@@ -1,0 +1,71 @@
+name: 'Android Emulator Test Action'
+description: 'Set up Android emulator and run instrumented tests'
+inputs:
+  api-level:
+    description: 'Android API level for the emulator'
+    required: true
+  arch:
+    description: 'CPU architecture for the emulator (x86, x86_64)'
+    required: false
+    default: 'x86_64'
+  profile:
+    description: 'Hardware profile for the emulator'
+    required: false
+    default: 'pixel_2'
+  script:
+    description: 'Custom script to run tests'
+    required: false
+    default: './gradlew connectedDebugAndroidTest'
+  emulator-options:
+    description: 'Additional emulator options'
+    required: false
+    default: '-no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none'
+outputs:
+  test-result:
+    description: 'Result of the test execution'
+    value: ${{ steps.run-tests.outputs.test-result }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: AVD cache
+      uses: actions/cache@v3
+      id: avd-cache
+      with:
+        path: |
+          ~/.android/avd/*
+          ~/.android/adb*
+        key: avd-${{ inputs.api-level }}-${{ inputs.arch }}
+
+    - name: Create AVD and generate snapshot for caching
+      if: steps.avd-cache.outputs.cache-hit != 'true'
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: ${{ inputs.api-level }}
+        arch: ${{ inputs.arch }}
+        profile: ${{ inputs.profile }}
+        force-avd-creation: false
+        emulator-options: ${{ inputs.emulator-options }}
+        disable-animations: false
+        script: echo "Generated AVD snapshot for caching."
+
+    - name: Run Espresso tests
+      id: run-tests
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: ${{ inputs.api-level }}
+        arch: ${{ inputs.arch }}
+        profile: ${{ inputs.profile }}
+        force-avd-creation: false
+        emulator-options: ${{ inputs.emulator-options }}
+        disable-animations: true
+        script: |
+          ${{ inputs.script }}
+          echo "test-result=$?" >> $GITHUB_OUTPUT
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results-${{ inputs.api-level }}-${{ inputs.arch }}
+        path: app/build/reports

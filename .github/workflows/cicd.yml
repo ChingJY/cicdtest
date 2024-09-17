@@ -1,0 +1,156 @@
+name: CICD-SWITCH-BRANCH
+on:
+  workflow_dispatch:
+    push:
+        branches: [ develop, release, master, github_action_cicd ]
+#    pull_request:
+#        branches: [ develop ]
+
+env:
+  GITHUB_USERNAME: ${{ secrets.SECRET_GITHUB_USERNAME }}
+  GITHUB_ACCESS_TOKEN: ${{ secrets.SECRET_GITHUB_ACCESS_TOKEN }}
+  STORE_PASSWORD: ${{ secrets.KEYSTORE_KEY_STORE_PASSWORD }}
+  KEY_ALIAS: ${{ secrets.KEYSTORE_KEY_ALIAS }}
+  KEY_PASSWORD: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
+  HUAWEI_PUBLISHING_APP_ID: ${{ secrets.HUAWEI_PUBLISHING_APP_ID }}
+  HUAWEI_PUBLISHING_CLIENT_ID: ${{ secrets.HUAWEI_PUBLISHING_CLIENT_ID }}
+  HUAWEI_PUBLISHING_CLIENT_SECRET: ${{ secrets.HUAWEI_PUBLISHING_CLIENT_SECRET }}
+
+jobs:
+  setup-java:
+    name: Setup Java
+    runs-on: ${{ vars.RUNNING_HOST }}
+    outputs:
+      java-home: ${{ steps.java-setup.outputs.java-home }}
+    steps:
+      - name: Setup JDK Version
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ vars.JAVA_VERSION }}
+          distribution: ${{ vars.JAVA_DISTRIBUTION }}
+          cache: gradle
+
+  develop_test:
+    name: Run develop branch task
+    runs-on: ${{ vars.RUNNING_HOST }}
+    needs: setup-java
+    if: git.ref_name == 'develop'
+    steps:
+      - name: Check out project
+        uses: actions/checkout@v3
+
+      - name: build APK for test
+        run: |
+          ./gradlew assembleDebug
+          ./gradlew assembleDebugAndroidTest
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug.apk
+          override: true
+          path: app/build/outputs/apk/release/app-debug.apk
+
+      - name: Run Emulator Tests
+        uses: ./.github/actions/android-emulator-test-action
+        with:
+          api-level: ${{ matrix.api-level }}
+          arch: x86_64
+          profile: pixel_3a
+          script: |
+            ./gradlew connectedDebugAndroidTest
+            ./gradlew connectedDebugUnitTest
+
+      - name: Send notification to Google Chat
+        if: always()
+        env:
+          MESSAGE: |
+            Build project and test
+            Status: ${{ job.status }}
+            Repository: ${{ github.repository }}
+            Triggered by: ${{ github.actor }}
+        run: |
+          MESSAGE=$(echo "$MESSAGE" | awk '{printf "%s\\n", $0}' | sed '$d' | sed 's/"/\\"/g')
+          curl -X POST -H 'Content-Type: application/json' -d "{
+            \"text\": \"$MESSAGE\"
+          }" '${{ secrets.GOOGLE_CHAT_WEBHOOK }}'
+
+  release_distribute:
+    name: Run release branch task
+    runs-on: ${{ vars.RUNNING_HOST }}
+    needs: setup-java
+    if: git.ref_name == 'release'
+    steps:
+      - name: Check out project
+        uses: actions/checkout@v3
+
+      - name: Use Java from setup
+        env:
+          JAVA_HOME: ${{ needs.setup-java.outputs.java-home }}
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Decrypt Firebase Distribution credential
+        run: |
+          openssl enc -aes-256-cbc -k "${{ secrets.OPENSSL_PASSWORD }}" \
+          -in firebase-app-distribution-credential.json.enc \
+          -out firebase-app-distribution-credential.json -d -md sha256
+
+      - name: Generate file of commit message
+        run: |
+          git show -s --format=%B > commit.txt
+          echo "save commit message to file commit.txt"
+          cat commit.txt
+
+      - name: Build Release APK and AAB
+        run: |
+          ./gradlew assembleRelease
+          ./gradlew bundleRelease
+
+      - name: Upload to Firebase App Distribution
+        run: ./gradlew appDistributionUploadRelease
+
+      - name: Send notification to Google Chat
+        if: always()
+        env:
+          MESSAGE: |
+            Upload App to Firebase App Distribution
+            Status: ${{ job.status }}
+            Repository: ${{ github.repository }}
+            Triggered by: ${{ github.actor }}
+        run: |
+          MESSAGE=$(echo "$MESSAGE" | awk '{printf "%s\\n", $0}' | sed 's/"/\\"/g')
+          curl -X POST -H 'Content-Type: application/json' -d "{
+            \"text\": \"$MESSAGE\"
+          }" '${{ secrets.GOOGLE_CHAT_WEBHOOK }}'
+
+    master_publish:
+      name: Run master branch task
+      runs-on: ${{ vars.RUNNING_HOST }}
+      needs: setup-java
+      if: git.ref_name == 'master'
+      steps:
+        - name: Check out project
+          uses: actions/checkout@v3
+
+        - name: Use Java from setup
+          env:
+            JAVA_HOME: ${{ needs.setup-java.outputs.java-home }}
+
+        - name: Grant execute permission for gradlew
+          run: chmod +x gradlew
+
+        - name: Send notification to Google Chat
+          if: always()
+          env:
+            MESSAGE: |
+              Publish to Google play
+              Status: ${{ job.status }}
+              Repository: ${{ github.repository }}
+              Triggered by: ${{ github.actor }}
+          run: |
+            MESSAGE=$(echo "$MESSAGE" | awk '{printf "%s\\n", $0}' | sed 's/"/\\"/g')
+            curl -X POST -H 'Content-Type: application/json' -d "{
+              \"text\": \"$MESSAGE\"
+            }" '${{ secrets.GOOGLE_CHAT_WEBHOOK }}'
