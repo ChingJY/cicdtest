@@ -36,7 +36,7 @@ jobs:
     name: Run develop branch task
     runs-on: ${{ vars.RUNNING_HOST }}
     needs: setup-java
-    if: git.ref_name == 'develop'
+    if: github.ref_name == 'develop'
     steps:
       - name: Check out project
         uses: actions/checkout@v3
@@ -84,7 +84,7 @@ jobs:
     name: Run release branch task
     runs-on: ${{ vars.RUNNING_HOST }}
     needs: setup-java
-    if: git.ref_name == 'release'
+    if: github.ref_name == 'release'
     steps:
       - name: Check out project
         uses: actions/checkout@v3
@@ -130,7 +130,7 @@ jobs:
     name: Run master branch task
     runs-on: ${{ vars.RUNNING_HOST }}
     needs: setup-java
-    if: git.ref_name == 'master'
+    if: github.ref_name == 'master'
     steps:
       - name: Check out project
         uses: actions/checkout@v3
