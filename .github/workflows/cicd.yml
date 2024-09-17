@@ -40,6 +40,9 @@ jobs:
     runs-on: ${{ vars.RUNNING_HOST }}
     needs: setup-java
     if: github.ref_name == 'develop'
+    strategy:
+      matrix:
+        api-level: [ 29, 30 ]
     steps:
       - name: Check out project
         uses: actions/checkout@v3
