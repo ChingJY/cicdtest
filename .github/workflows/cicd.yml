@@ -59,15 +59,8 @@ jobs:
           override: true
           path: app/build/outputs/apk/debug/app-debug.apk
 
-      - name: Run Emulator Tests
-        uses: ./.github/actions/android-emulator-test-action
-        with:
-          api-level: 29
-          arch: arm64-v8a
-          profile: pixel_3a
-          script: |
-            ./gradlew connectedDebugAndroidTest
-            ./gradlew connectedDebugUnitTest
+      - name: Run Android UI Tests
+        uses: vgaidarji/android-github-actions-emulator@v1.0.1
 
       - name: Send notification to Google Chat
         if: always()
