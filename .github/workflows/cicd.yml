@@ -1,8 +1,8 @@
 name: CICD-SWITCH-BRANCH
 on:
   workflow_dispatch:
-    push:
-        branches: [ develop, release, master, github_action_cicd ]
+  push:
+      branches: [ develop, release, master, github_action_cicd ]
 #    pull_request:
 #        branches: [ develop ]
 
@@ -20,24 +20,32 @@ jobs:
   setup-java:
     name: Setup Java
     runs-on: ${{ vars.RUNNING_HOST }}
-    outputs:
-      java-home: ${{ steps.java-setup.outputs.java-home }}
     steps:
+      - name: Check out project
+        uses: actions/checkout@v3
+
       - name: Setup JDK Version
+        id: setup-java
         uses: actions/setup-java@v4
         with:
           java-version: ${{ vars.JAVA_VERSION }}
           distribution: ${{ vars.JAVA_DISTRIBUTION }}
           cache: gradle
 
+      - name: Set JAVA_HOME env
+        run: echo "JAVA_HOME=steps.setup-java.outputs.java-home" >> $GITHUB_ENV
+
   develop_test:
     name: Run develop branch task
     runs-on: ${{ vars.RUNNING_HOST }}
     needs: setup-java
-    if: git.ref_name == 'develop'
+    if: github.ref_name == 'develop'
     steps:
       - name: Check out project
         uses: actions/checkout@v3
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
       - name: build APK for test
         run: |
@@ -79,14 +87,10 @@ jobs:
     name: Run release branch task
     runs-on: ${{ vars.RUNNING_HOST }}
     needs: setup-java
-    if: git.ref_name == 'release'
+    if: github.ref_name == 'release'
     steps:
       - name: Check out project
         uses: actions/checkout@v3
-
-      - name: Use Java from setup
-        env:
-          JAVA_HOME: ${{ needs.setup-java.outputs.java-home }}
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -125,32 +129,28 @@ jobs:
             \"text\": \"$MESSAGE\"
           }" '${{ secrets.GOOGLE_CHAT_WEBHOOK }}'
 
-    master_publish:
-      name: Run master branch task
-      runs-on: ${{ vars.RUNNING_HOST }}
-      needs: setup-java
-      if: git.ref_name == 'master'
-      steps:
-        - name: Check out project
-          uses: actions/checkout@v3
+  master_publish:
+    name: Run master branch task
+    runs-on: ${{ vars.RUNNING_HOST }}
+    needs: setup-java
+    if: github.ref_name == 'master'
+    steps:
+      - name: Check out project
+        uses: actions/checkout@v3
 
-        - name: Use Java from setup
-          env:
-            JAVA_HOME: ${{ needs.setup-java.outputs.java-home }}
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
-        - name: Grant execute permission for gradlew
-          run: chmod +x gradlew
-
-        - name: Send notification to Google Chat
-          if: always()
-          env:
-            MESSAGE: |
-              Publish to Google play
-              Status: ${{ job.status }}
-              Repository: ${{ github.repository }}
-              Triggered by: ${{ github.actor }}
-          run: |
-            MESSAGE=$(echo "$MESSAGE" | awk '{printf "%s\\n", $0}' | sed 's/"/\\"/g')
-            curl -X POST -H 'Content-Type: application/json' -d "{
-              \"text\": \"$MESSAGE\"
-            }" '${{ secrets.GOOGLE_CHAT_WEBHOOK }}'
+      - name: Send notification to Google Chat
+        if: always()
+        env:
+          MESSAGE: |
+            Publish to Google play
+            Status: ${{ job.status }}
+            Repository: ${{ github.repository }}
+            Triggered by: ${{ github.actor }}
+        run: |
+          MESSAGE=$(echo "$MESSAGE" | awk '{printf "%s\\n", $0}' | sed 's/"/\\"/g')
+          curl -X POST -H 'Content-Type: application/json' -d "{
+            \"text\": \"$MESSAGE\"
+          }" '${{ secrets.GOOGLE_CHAT_WEBHOOK }}'
