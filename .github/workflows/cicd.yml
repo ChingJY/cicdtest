@@ -74,7 +74,7 @@ jobs:
             Status: ${{ job.status }}
             Repository: ${{ github.repository }}
             Triggered by: ${{ github.actor }}
-            Artifact Download: ${{ steps.upload-release-artifact.artifact-url }}
+            Artifact Download: ${{ steps.upload-release-artifact.outputs.artifact-url }}
         run: |
           MESSAGE=$(echo "$MESSAGE" | awk 'NF {printf "%s\\n", $0}' | sed 's/"/\\"/g')
           curl -X POST -H 'Content-Type: application/json' -d "{
@@ -136,7 +136,7 @@ jobs:
             Status: ${{ job.status }}
             Repository: ${{ github.repository }}
             Triggered by: ${{ github.actor }}
-            Artifact Download: ${{ steps.upload-release-artifact.artifact-url }}
+            Artifact Download: ${{ steps.upload-release-artifact.outputs.artifact-url }}
         run: |
           MESSAGE=$(echo "$MESSAGE" | awk 'NF {printf "%s\\n", $0}' | sed 's/"/\\"/g')
           curl -X POST -H 'Content-Type: application/json' -d "{
@@ -182,7 +182,7 @@ jobs:
             Status: ${{ job.status }}
             Repository: ${{ github.repository }}
             Triggered by: ${{ github.actor }}
-            Artifact Download: ${{ steps.upload-release-artifact.artifact-url }}
+            Artifact Download: ${{ steps.upload-release-artifact.outputs.artifact-url }}
         run: |
           MESSAGE=$(echo "$MESSAGE" | awk 'NF {printf "%s\\n", $0}' | sed 's/"/\\"/g')
           curl -X POST -H 'Content-Type: application/json' -d "{
