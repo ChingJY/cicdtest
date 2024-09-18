@@ -17,9 +17,10 @@ env:
   HUAWEI_PUBLISHING_CLIENT_SECRET: ${{ secrets.HUAWEI_PUBLISHING_CLIENT_SECRET }}
 
 jobs:
-  setup-java:
-    name: Setup Java
+  develop_task:
+    name: Run develop branch task
     runs-on: ${{ vars.RUNNING_HOST }}
+    if: github.ref_name == 'develop'
     steps:
       - name: Check out project
         uses: actions/checkout@v4
@@ -30,19 +31,6 @@ jobs:
         with:
           java-version: ${{ vars.JAVA_VERSION }}
           distribution: ${{ vars.JAVA_DISTRIBUTION }}
-          cache: gradle
-
-      - name: Set JAVA_HOME env
-        run: echo "JAVA_HOME=steps.setup-java.outputs.java-home" >> $GITHUB_ENV
-
-  develop_task:
-    name: Run develop branch task
-    runs-on: ${{ vars.RUNNING_HOST }}
-    needs: setup-java
-    if: github.ref_name == 'develop'
-    steps:
-      - name: Check out project
-        uses: actions/checkout@v4
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -84,11 +72,17 @@ jobs:
   release_task:
     name: Run release branch task
     runs-on: ${{ vars.RUNNING_HOST }}
-    needs: setup-java
     if: github.ref_name == 'release'
     steps:
       - name: Check out project
         uses: actions/checkout@v4
+
+      - name: Setup JDK Version
+        id: setup-java
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ vars.JAVA_VERSION }}
+          distribution: ${{ vars.JAVA_DISTRIBUTION }}
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -146,11 +140,17 @@ jobs:
   master_task:
     name: Run master branch task
     runs-on: ${{ vars.RUNNING_HOST }}
-    needs: setup-java
 #    if: github.ref_name == 'master'
     steps:
       - name: Check out project
         uses: actions/checkout@v4
+
+      - name: Setup JDK Version
+        id: setup-java
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ vars.JAVA_VERSION }}
+          distribution: ${{ vars.JAVA_DISTRIBUTION }}
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
