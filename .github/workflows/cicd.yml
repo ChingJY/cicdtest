@@ -195,7 +195,7 @@ jobs:
           releaseFiles: app/build/outputs/bundle/release/app-release.aab
           track: beta
           userFraction: 0.01
-          state: draft
+          status: draft
           mappingFile: ${{ env.MAPPING_FILE_EXISTS == 'true' && 'app/build/outputs/mapping/release/mapping.txt' || '' }}
 
       - name: Send notification to Google Chat
