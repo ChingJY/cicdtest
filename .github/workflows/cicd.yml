@@ -59,6 +59,7 @@ jobs:
           ./gradlew assembleRelease
 
       - name: Upload APK
+        id: upload-release-artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release.apk
@@ -73,6 +74,7 @@ jobs:
             Status: ${{ job.status }}
             Repository: ${{ github.repository }}
             Triggered by: ${{ github.actor }}
+            Artifact Download: ${{ upload-release-artifact.artifact-url }}
         run: |
           MESSAGE=$(echo "$MESSAGE" | awk 'NF {printf "%s\\n", $0}' | sed 's/"/\\"/g')
           curl -X POST -H 'Content-Type: application/json' -d "{
@@ -115,6 +117,14 @@ jobs:
           ./gradlew assembleRelease
           ./gradlew bundleRelease
 
+      - name: Upload AAB
+        id: upload-release-artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release.aab
+          override: true
+          path: app/build/outputs/bundle/release/app-release.aab
+
       - name: Upload to Firebase App Distribution
         run: ./gradlew appDistributionUploadRelease
 
@@ -126,8 +136,9 @@ jobs:
             Status: ${{ job.status }}
             Repository: ${{ github.repository }}
             Triggered by: ${{ github.actor }}
+            Artifact Download: ${{ upload-release-artifact.artifact-url }}
         run: |
-          MESSAGE=$(echo "$MESSAGE" | awk '{printf "%s\\n", $0}' | sed 's/"/\\"/g')
+          MESSAGE=$(echo "$MESSAGE" | awk 'NF {printf "%s\\n", $0}' | sed 's/"/\\"/g')
           curl -X POST -H 'Content-Type: application/json' -d "{
             \"text\": \"$MESSAGE\"
           }" '${{ secrets.GOOGLE_CHAT_WEBHOOK }}'
@@ -151,6 +162,18 @@ jobs:
           echo $ENCODED_KEYSTORE | base64 -D > keystore-voicetube.keystore
           echo "KEYSTORE_FILE=$PWD/keystore-voicetube.keystore" >> $GITHUB_ENV
 
+      - name: Build Release AAB
+        run: |
+          ./gradlew bundleRelease
+
+      - name: Upload AAB
+        id: upload-release-artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release.aab
+          override: true
+          path: app/build/outputs/bundle/release/app-release.aab
+
       - name: Send notification to Google Chat
         if: always()
         env:
@@ -159,8 +182,9 @@ jobs:
             Status: ${{ job.status }}
             Repository: ${{ github.repository }}
             Triggered by: ${{ github.actor }}
+            Artifact Download: ${{ upload-release-artifact.artifact-url }}
         run: |
-          MESSAGE=$(echo "$MESSAGE" | awk '{printf "%s\\n", $0}' | sed 's/"/\\"/g')
+          MESSAGE=$(echo "$MESSAGE" | awk 'NF {printf "%s\\n", $0}' | sed 's/"/\\"/g')
           curl -X POST -H 'Content-Type: application/json' -d "{
             \"text\": \"$MESSAGE\"
           }" '${{ secrets.GOOGLE_CHAT_WEBHOOK }}'
