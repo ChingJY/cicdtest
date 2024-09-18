@@ -50,7 +50,7 @@ object CoreConfig {
         const val majorVersion: Int = 1
         const val minorVersion: Int = 0
         const val hotfixVersion: Int = 0
-        const val versionCode: Int = 2
+        const val versionCode: Int = 3
         val versionName: String = "$majorVersion.$minorVersion.$hotfixVersion.${simpleDateFormat.format(Date())}"
     }
 

@@ -194,6 +194,8 @@ jobs:
           packageName: com.yitianyitiandan.cicdtest
           releaseFiles: app/build/outputs/bundle/release/app-release.aab
           track: beta
+          userFraction: 0.0
+          state: draft
           mappingFile: ${{ env.MAPPING_FILE_EXISTS == 'true' && 'app/build/outputs/mapping/release/mapping.txt' || '' }}
 
       - name: Send notification to Google Chat
