@@ -38,7 +38,7 @@ jobs:
   develop_task:
     name: Run develop branch task
     runs-on: ${{ vars.RUNNING_HOST }}
-    needs: setup_keystore
+    needs: setup-java
     if: github.ref_name == 'develop'
     steps:
       - name: Check out project
@@ -82,7 +82,7 @@ jobs:
   release_task:
     name: Run release branch task
     runs-on: ${{ vars.RUNNING_HOST }}
-    needs: setup_keystore
+    needs: setup-java
     if: github.ref_name == 'release'
     steps:
       - name: Check out project
@@ -135,7 +135,7 @@ jobs:
   master_task:
     name: Run master branch task
     runs-on: ${{ vars.RUNNING_HOST }}
-    needs: setup_keystore
+    needs: setup-java
     if: github.ref_name == 'master'
     steps:
       - name: Check out project
