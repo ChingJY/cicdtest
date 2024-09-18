@@ -185,7 +185,6 @@ jobs:
           packageName: com.yitianyitiandan.cicdtest
           releaseFiles: app/build/outputs/bundle/release/app-release.aab
           track: beta
-          status: inProgress
           mappingFile: app/build/outputs/mapping/release/mapping.txt
 
       - name: Send notification to Google Chat
