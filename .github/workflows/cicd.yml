@@ -186,7 +186,6 @@ jobs:
           releaseFiles: app/build/outputs/bundle/release/app-release.aab
           track: beta
           status: inProgress
-          userFraction: 1.0
           mappingFile: app/build/outputs/mapping/release/mapping.txt
 
       - name: Send notification to Google Chat
