@@ -17,18 +17,9 @@ env:
   HUAWEI_PUBLISHING_CLIENT_SECRET: ${{ secrets.HUAWEI_PUBLISHING_CLIENT_SECRET }}
 
 jobs:
-  init:
-    name: Task init
-    runs-on: ${{ vars.RUNNING_HOST }}
-    steps:
-      - name: Read versionInfo.txt
-        id: read_version
-        run: echo "VERSION_NAME=$(cat versionInfo.txt)" >> $GITHUB_ENV
-
   develop_task:
     name: Run develop branch task
     runs-on: ${{ vars.RUNNING_HOST }}
-    needs: init
 #    if: github.ref_name == 'develop'
     steps:
       - name: Check out project
@@ -63,6 +54,10 @@ jobs:
           override: true
           path: app/build/outputs/apk/release/app-release.apk
 
+      - name: Read versionInfo.txt
+        id: read_version
+        run: echo "VERSION_NAME=$(cat versionInfo.txt)" >> $GITHUB_ENV
+
       - name: Send notification to Google Chat
         if: always()
         env:
@@ -82,7 +77,6 @@ jobs:
   release_task:
     name: Run release branch task
     runs-on: ${{ vars.RUNNING_HOST }}
-    needs: init
 #    if: github.ref_name == 'release'
     steps:
       - name: Check out project
@@ -133,6 +127,10 @@ jobs:
       - name: Upload to Firebase App Distribution
         run: ./gradlew appDistributionUploadRelease
 
+      - name: Read versionInfo.txt
+        id: read_version
+        run: echo "VERSION_NAME=$(cat versionInfo.txt)" >> $GITHUB_ENV
+
       - name: Send notification to Google Chat
         if: always()
         env:
@@ -152,7 +150,6 @@ jobs:
   master_task:
     name: Run master branch task
     runs-on: ${{ vars.RUNNING_HOST }}
-    needs: init
 #    if: github.ref_name == 'master'
     steps:
       - name: Check out project
@@ -213,12 +210,13 @@ jobs:
       - name: Send notification to Google Chat
         if: always()
         env:
+          VERSION_NAME: $(cat versionInfo.txt)
           MESSAGE: |
             Android VoiceTube 已佈署至 Google Play Store (Beta)
             請相關人員注意發版
             Status: ${{ job.status }}
             Branch: ${{ github.ref_name }}
-            Version: ${{ env.VERSION_NAME }}
+            Version: ${{ VERSION_NAME }}
             Author by: ${{ github.actor }}
             Download URL: ${{ steps.publish-google-play.outputs.internalSharingDownloadUrl }}
         run: |
