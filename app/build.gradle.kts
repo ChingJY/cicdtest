@@ -2,6 +2,7 @@ import java.io.FileInputStream
 import java.util.Properties
 
 buildscript {
+    buildFile("${rootDir}/versionInfo.txt", CoreConfig.App.versionName)
     repositories {
         maven("https://plugins.gradle.org/m2/")
     }
