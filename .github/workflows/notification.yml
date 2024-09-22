@@ -28,7 +28,7 @@ jobs:
                   Branch=${{ github.ref_name }}
                   Author=${{ github.actor }}
                 buttons: |
-                  View on GitHub=https://github.com/sashakavun/android-ci-cd
+                  View on GitHub::https://github.com/sashakavun/android-ci-cd
 
             - name: Send notification in release branch
               uses: ./.github/actions/google-chat-notification-action
@@ -45,7 +45,7 @@ jobs:
                 title: "Android VoiceTube"
                 message: "Android VoiceTube 已佈署至 Google Play Store (Beta)  :rocket:\n請相關人員注意發版"
                 version_name: ${{ env.VERSION_NAME }}
-                bottons: |
+                buttons: |
                     前往 Google Play Console 發版::https://play.google.com/console/u/0/developers/5409789340805974120/app/4972045572799454695/tracks/production
                     前往 AppGallery Connect 發版::https://developer.huawei.com/consumer/cn/service/josp/agc/index.html#/myApp
                     Edit Release Note::https://docs.google.com/spreadsheets/d/1C3-ohBrzsYCMyzzxnY3yis9Fuh84ibge-8M0mAnW1jg/edit#gid=1410907833

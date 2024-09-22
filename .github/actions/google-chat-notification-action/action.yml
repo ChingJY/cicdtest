@@ -80,7 +80,7 @@ runs:
                       "widgets": [
                         {
                           "textParagraph": {
-                            "text": "<b>$MESSAGE</b>"
+                            "text": "$MESSAGE"
                           }
                         },
                         {
