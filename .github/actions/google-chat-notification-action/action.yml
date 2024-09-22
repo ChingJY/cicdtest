@@ -52,7 +52,8 @@ runs:
           local items=()
           while IFS= read -r line; do
             line=$(echo -n "$line" | tr -d '\n\r')
-            IFS='::' read -r text url <<< "$line"
+            text=${line%%::*}
+            url=${line#*::}
             if [ -n "$text" ] && [ -n "$url" ]; then
               items+=("{\"text\":\"$text\",\"onClick\":{\"openLink\":{\"url\":\"$url\"}}}")
             fi
