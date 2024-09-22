@@ -17,7 +17,7 @@ jobs:
               run: echo "VERSION_NAME=v4.3.5.0928" >> $GITHUB_ENV
               
             - name: Send notification in develop branch
-              uses: ./.github/actions/google-chat-notification-action@v1
+              uses: ./.github/actions/google-chat-notification-action
               with:
                 webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
                 title: "Android VoiceTube"
@@ -31,7 +31,7 @@ jobs:
                   View on GitHub=https://github.com/sashakavun/android-ci-cd
 
             - name: Send notification in release branch
-              uses: actions/google-chat-notification-action@v1
+              uses: ./.github/actions/google-chat-notification-action
               with:
                 webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
                 title: "Android VoiceTube"
@@ -39,7 +39,7 @@ jobs:
                 version_name: ${{ env.VERSION_NAME }}
             
             - name: Send notification in master branch
-              uses: actions/google-chat-notification-action@v1
+              uses: ./.github/actions/google-chat-notification-action
               with:
                 webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
                 title: "Android VoiceTube"
