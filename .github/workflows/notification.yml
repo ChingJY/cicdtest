@@ -19,7 +19,7 @@ jobs:
             - name: Send notification in develop branch
               uses: ./.github/actions/google-chat-notification-action
               with:
-                webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
+                webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
                 title: "Android VoiceTube"
                 message: "Android VoiceTube 已成功整合  :cooldog:"
                 version_name: ${{ env.VERSION_NAME }}
@@ -33,7 +33,7 @@ jobs:
             - name: Send notification in release branch
               uses: ./.github/actions/google-chat-notification-action
               with:
-                webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
+                webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
                 title: "Android VoiceTube"
                 message: "Android VoiceTube 已發布測試  :tada:"
                 version_name: ${{ env.VERSION_NAME }}
@@ -41,7 +41,7 @@ jobs:
             - name: Send notification in master branch
               uses: ./.github/actions/google-chat-notification-action
               with:
-                webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
+                webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
                 title: "Android VoiceTube"
                 message: "Android VoiceTube 已佈署至 Google Play Store (Beta)  :rocket:\n請相關人員注意發版"
                 version_name: ${{ env.VERSION_NAME }}
