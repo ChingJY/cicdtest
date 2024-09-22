@@ -1,81 +1,117 @@
-name: 'Google Chat Notification Action'
-description: 'Send a customizable notification to Google Chat'
+name: 'Google Chat Notification'
+description: 'Send a notification to Google Chat'
 inputs:
   webhook_url:
-    description: Google Chat webhook Url
+    description: 'Google Chat webhook URL'
     required: true
   title:
-    description: 'Title of the card'
+    description: 'Title for the card header'
+    required: false
+    default: "Android App Notification"
+  message:
+    description: 'Message for the section'
     required: true
-    default: Notification
-  subtitle:
-    description: 'Subtitle of the card'
+  version_name:
+    description: 'Version name of the app'
     required: false
   key_value_pairs:
-    description: 'Key-value pairs to display, one pair per line in format: key=value'
+    description: 'Key-value pairs to display (format: key1=value1\nkey2=value2)'
     required: false
   buttons:
-    description: 'Buttons to display, one button per line in format: label::url'
+    description: 'Buttons to add (format: text1::url1\ntext2::url2)'
     required: false
 runs:
   using: "composite"
   steps:
-    - name: Send Google Chat Notification
+    - name: Send notification
       shell: bash
       env:
         WEBHOOK_URL: ${{ inputs.webhook_url }}
-        CARD_TITLE: ${{ inputs.title }}
-        CARD_SUBTITLE: ${{ inputs.subtitle }}
+        HEADER_TITLE: ${{ inputs.title }}
+        MESSAGE: ${{ inputs.message }}
+        VERSION_NAME: ${{ inputs.version_name }}
         KEY_VALUE_PAIRS: ${{ inputs.key_value_pairs }}
         BUTTONS: ${{ inputs.buttons }}
       run: |
-        # Function to create keyValue widgets
-        create_key_value_widgets() {
-          if [ -n "$KEY_VALUE_PAIRS" ]; then
-            echo "$KEY_VALUE_PAIRS" | while IFS= read -r line; do
-              IFS='=' read -r key value <<< "$line"
-              echo "{\"keyValue\": {\"topLabel\": \"$key\", \"content\": \"$value\"}}"
-            done
-          fi
+        # Function to create decorated text widgets
+        create_decorated_text_widgets() {
+          local result=""
+          while IFS= read -r line; do
+            IFS='=' read -r key value <<< "$line"
+            if [ -n "$key" ] && [ -n "$value" ]; then
+              result+="{\"decoratedText\":{\"topLabel\":\"$key\",\"text\":\"$value\"}},\n"
+            fi
+          done <<< "$1"
+          echo "${result%,\n}"  # Remove trailing comma and newline
         }
-        
-        # Function to create button widgets
-        create_button_widgets() {
-          if [ -n "$BUTTONS" ]; then
-            echo "$BUTTONS" | while IFS= read -r line; do
-              IFS='::' read -r label url <<< "$line"
-              echo "{\"buttons\": [{\"textButton\": {\"text\": \"$label\", \"onClick\": {\"openLink\": {\"url\": \"$url\"}}}}]}"
-            done
-          fi
+
+        # Function to create button list widget
+        create_button_list_widget() {
+          local result="{\"buttonList\":{\"buttons\":["
+          while IFS= read -r line; do
+            IFS='::' read -r text url <<< "$line"
+            if [ -n "$text" ] && [ -n "$url" ]; then
+              result+="{\"text\":\"$text\",\"onClick\":{\"openLink\":{\"url\":\"$url\"}}},"
+            fi
+          done <<< "$1"
+          result="${result%,}]}}"  # Remove trailing comma and close the structure
+          echo "$result"
         }
-        
-        # Construct the payload
-        payload=$(cat <<EOF
+
+        # Create widgets
+        decorated_text_widgets=$(create_decorated_text_widgets "$KEY_VALUE_PAIRS")
+        button_list_widget=$(create_button_list_widget "$BUTTONS")
+
+        # Construct the final JSON payload
+        json_payload=$(cat <<EOF
           {
             "cardsV2": [
               {
-                "header": {
-                  "title": "$CARD_TITLE",
-                  "subtitle": "$CARD_SUBTITLE"
-                  "imageUrl": "https://cdn.voicetube.com/assets/img/app_logo/android.png",
-                  "imageType": "CIRCLE",
-                },
-                "collapsible": true,
-                "sections": [
-                  {
-                    "widgets": [
-                      $(create_key_value_widgets | paste -sd, -),
-                      $(create_button_widgets | paste -sd, -)
-                    ]
-                  }
-                ]
+                "card": {
+                  "header": {
+                    "title": "$HEADER_TITLE",
+                    "imageUrl": "https://cdn.voicetube.com/assets/img/app_logo/android.png",
+                    "imageType": "CIRCLE"
+                  },
+                  "sections": [
+                    {
+                      "collapsible": true,
+                      "uncollapsibleWidgetsCount": 1,
+                      "widgets": [
+                        {
+                          "textParagraph": {
+                            "text": "<b>$MESSAGE</b>"
+                          }
+                        },
+                        {
+                          "decoratedText": {
+                            "topLabel": "App Version",
+                            "text": "${VERSION_NAME:-N/A}"
+                          }
+                        },
+                        {
+                          "decoratedText": {
+                            "topLabel": "Branch",
+                            "text": "${{ github.ref_name }}"
+                          }
+                        },
+                        {
+                          "decoratedText": {
+                            "topLabel": "Author",
+                            "text": "${{ github.actor }}"
+                          }
+                        }$([ -n "$decorated_text_widgets" ] && echo ",
+                        $decorated_text_widgets")$([ -n "$button_list_widget" ] && echo ",
+                        $button_list_widget")
+                      ]
+                    }
+                  ]
+                }
               }
             ]
           }
         EOF
         )
-        
+
         # Send the notification
-        curl --location --request POST "$WEBHOOK_URL" \
-          --header 'Content-Type: application/json' \
-          --data-raw "$payload"
+        curl -H "Content-Type: application/json" -X POST -d "$json_payload" "$WEBHOOK_URL"
