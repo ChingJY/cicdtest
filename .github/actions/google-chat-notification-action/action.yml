@@ -35,34 +35,79 @@ runs:
       run: |
         # Function to create decorated text widgets
         create_decorated_text_widgets() {
-          local result=""
+          local items=()
           while IFS= read -r line; do
             line=$(echo -n "$line" | tr -d '\n\r')
             IFS='=' read -r key value <<< "$line"
             if [ -n "$key" ] && [ -n "$value" ]; then
-              result+="{\"decoratedText\":{\"topLabel\":\"$key\",\"text\":\"$value\"}},\n"
+              items+=("{\"decoratedText\":{\"topLabel\":\"$key\",\"text\":\"$value\"}}")
             fi
           done <<< "$1"
-          echo "${result%,\n}"  # Remove trailing comma and newline
+          local result=$(IFS=,; echo "${items[*]}")
+          echo "$result"
         }
 
         # Function to create button list widget
         create_button_list_widget() {
-          local result="{\"buttonList\":{\"buttons\":["
+          local items=()
           while IFS= read -r line; do
             line=$(echo -n "$line" | tr -d '\n\r')
             IFS='::' read -r text url <<< "$line"
             if [ -n "$text" ] && [ -n "$url" ]; then
-              result+="{\"text\":\"$text\",\"onClick\":{\"openLink\":{\"url\":\"$url\"}}},"
+              items+=("{\"text\":\"$text\",\"onClick\":{\"openLink\":{\"url\":\"$url\"}}}")
             fi
           done <<< "$1"
-          result="${result%,}]}}"  # Remove trailing comma and close the structure
-          echo "$result"
+          local buttons=$(IFS=,; echo "${items[*]}")
+          echo "{\"buttonList\":{\"buttons\":[$buttons]}}"
         }
 
         # Create widgets
-        decorated_text_widgets=$(create_decorated_text_widgets "$KEY_VALUE_PAIRS")
+        key_value_widgets=$(create_decorated_text_widgets "$KEY_VALUE_PAIRS")
         button_list_widget=$(create_button_list_widget "$BUTTONS")
+
+        # Construct the widgets array
+        widgets="[
+          {
+            \"textParagraph\": {
+              \"text\": \"$MESSAGE\"
+            }
+          },
+          {
+            \"decoratedText\": {
+              \"topLabel\": \"App Version\",
+              \"text\": \"${VERSION_NAME:-N/A}\"
+            }
+          },
+          {
+            \"decoratedText\": {
+              \"topLabel\": \"Branch\",
+              \"text\": \"${{ github.ref_name }}\"
+            }
+          },
+          {
+            \"decoratedText\": {
+              \"topLabel\": \"Author\",
+              \"text\": \"${{ github.actor }}\"
+            }
+          }"
+
+        # Add key_value_widgets if not empty
+        if [ -n "$key_value_widgets" ]; then
+          widgets+=",$key_value_widgets"
+        fi
+
+        widgets+=",{
+          \"textParagraph\": {
+            \"text\": \"${{ github.event.head_commit.message }}\"
+          }
+        }"
+
+        # Add button_list_widget if not empty
+        if [ -n "$button_list_widget" ]; then
+          widgets+=",$button_list_widget"
+        fi
+
+        widgets+="]"
 
         # Construct the final JSON payload
         json_payload=$(cat <<EOF
@@ -78,34 +123,8 @@ runs:
                   "sections": [
                     {
                       "collapsible": true,
-                      "uncollapsibleWidgetsCount": 1,
-                      "widgets": [
-                        {
-                          "textParagraph": {
-                            "text": "$MESSAGE"
-                          }
-                        },
-                        {
-                          "decoratedText": {
-                            "topLabel": "App Version",
-                            "text": "${VERSION_NAME:-N/A}"
-                          }
-                        },
-                        {
-                          "decoratedText": {
-                            "topLabel": "Branch",
-                            "text": "${{ github.ref_name }}"
-                          }
-                        },
-                        {
-                          "decoratedText": {
-                            "topLabel": "Author",
-                            "text": "${{ github.actor }}"
-                          }
-                        }$([ -n "$decorated_text_widgets" ] && echo ",
-                        $decorated_text_widgets")$([ -n "$button_list_widget" ] && echo ",
-                        $button_list_widget")
-                      ]
+                      "uncollapsibleWidgetsCount": 4,
+                      "widgets": $widgets
                     }
                   ]
                 }
