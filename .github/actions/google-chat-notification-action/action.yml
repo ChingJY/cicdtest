@@ -37,6 +37,7 @@ runs:
         create_decorated_text_widgets() {
           local result=""
           while IFS= read -r line; do
+            line=$(echo -n "$line" | tr -d '\n\r')
             IFS='=' read -r key value <<< "$line"
             if [ -n "$key" ] && [ -n "$value" ]; then
               result+="{\"decoratedText\":{\"topLabel\":\"$key\",\"text\":\"$value\"}},\n"
@@ -49,6 +50,7 @@ runs:
         create_button_list_widget() {
           local result="{\"buttonList\":{\"buttons\":["
           while IFS= read -r line; do
+            line=$(echo -n "$line" | tr -d '\n\r')
             IFS='::' read -r text url <<< "$line"
             if [ -n "$text" ] && [ -n "$url" ]; then
               result+="{\"text\":\"$text\",\"onClick\":{\"openLink\":{\"url\":\"$url\"}}},"
