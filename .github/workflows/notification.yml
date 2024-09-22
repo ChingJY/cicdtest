@@ -17,7 +17,7 @@ jobs:
               run: echo "VERSION_NAME=v4.3.5.0928" >> $GITHUB_ENV
               
             - name: Send notification in develop branch
-              uses: actions/google-chat-notification-action@v1
+              uses: ./.github/actions/google-chat-notification-action@v1
               with:
                 webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
                 title: "Android VoiceTube"
