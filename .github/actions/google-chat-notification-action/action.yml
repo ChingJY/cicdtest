@@ -59,79 +59,74 @@ runs:
             fi
           done <<< "$1"
           local buttons=$(IFS=,; echo "${items[*]}")
-          echo "{\"buttonList\":{\"buttons\":[$buttons]}}"
+          echo "$buttons"
         }
 
         # Create widgets
         key_value_widgets=$(create_decorated_text_widgets "$KEY_VALUE_PAIRS")
-        button_list_widget=$(create_button_list_widget "$BUTTONS")
-
-        # Construct the widgets array
-        widgets="[
-          {
-            \"textParagraph\": {
-              \"text\": \"$MESSAGE\"
-            }
-          },
-          {
-            \"decoratedText\": {
-              \"topLabel\": \"App Version\",
-              \"text\": \"${VERSION_NAME:-N/A}\"
-            }
-          },
-          {
-            \"decoratedText\": {
-              \"topLabel\": \"Branch\",
-              \"text\": \"${{ github.ref_name }}\"
-            }
-          },
-          {
-            \"decoratedText\": {
-              \"topLabel\": \"Author\",
-              \"text\": \"${{ github.actor }}\"
-            }
-          }"
-
-        # Add key_value_widgets if not empty
-        if [ -n "$key_value_widgets" ]; then
-          widgets+=",$key_value_widgets"
-        fi
-
-        widgets+=",{
-          \"textParagraph\": {
-            \"text\": \"${{ github.event.head_commit.message }}\"
-          }
-        }"
-
-        # Add button_list_widget if not empty
-        if [ -n "$button_list_widget" ]; then
-          widgets+=",$button_list_widget"
-        fi
-
-        widgets+="]"
-
-        # Construct the final JSON payload
-        json_payload=$(cat <<EOF
-          {
-            "cardsV2": [
+        buttons=$(create_button_list_widget "$BUTTONS")
+        
+        # Prepare the button section if buttons are provided
+        button_section=""
+        if [ -n "$buttons" ]; then
+          button_section=',{
+            "widgets": [
               {
-                "card": {
-                  "header": {
-                    "title": "$HEADER_TITLE",
-                    "imageUrl": "https://cdn.voicetube.com/assets/img/app_logo/android.png",
-                    "imageType": "CIRCLE"
-                  },
-                  "sections": [
-                    {
-                      "collapsible": true,
-                      "uncollapsibleWidgetsCount": 4,
-                      "widgets": $widgets
-                    }
-                  ]
+                "buttonList": {
+                  "buttons": ['$buttons']
                 }
               }
             ]
-          }
+          }'
+        fi
+
+        # Construct the final JSON payload
+        json_payload=$(cat <<EOF
+        {
+          "cardsV2": [{
+            "cardId": "unique-card-id",
+            "card": {
+              "header": {
+                "title": "$HEADER_TITLE"
+              },
+              "sections": [
+                {
+                  "widgets": [
+                    {
+                      "textParagraph": {
+                        "text": "$MESSAGE"
+                      }
+                    },
+                    {
+                      "decoratedText": {
+                        "topLabel": "App Version",
+                        "text": "${VERSION_NAME:-N/A}"
+                      }
+                    },
+                    {
+                      "decoratedText": {
+                        "topLabel": "Branch",
+                        "text": "${{ github.ref_name }}"
+                      }
+                    },
+                    {
+                      "decoratedText": {
+                        "topLabel": "Author",
+                        "text": "${{ github.actor }}"
+                      }
+                    },
+                    $([ -n "$key_value_widgets" ] && echo "$key_value_widgets,")
+                    {
+                      "textParagraph": {
+                        "text": "${{ github.event.head_commit.message }}"
+                      }
+                    }
+                  ]
+                }$button_section
+              ]
+            }
+          }]
+        }
         EOF
         )
 
