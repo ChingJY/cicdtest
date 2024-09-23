@@ -62,6 +62,7 @@ jobs:
       - name: Send success notification to Google Chat
         uses: ./.github/actions/google-chat-notification-action
         with:
+          webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
           message: "Android CICDTest 已成功整合"
           version_name: ${{ env.VERSION_NAME }}
 
@@ -69,6 +70,7 @@ jobs:
         if: failure()
         uses: ./.github/actions/google-chat-notification-action
         with:
+          webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
           title: "Android CICDTest"
           message: "Android VoiceTube build failed"
           buttons: |
@@ -143,6 +145,7 @@ jobs:
         if: failure()
         uses: ./.github/actions/google-chat-notification-action
         with:
+          webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
           title: "Android CICDTest"
           message: "Android CICDTest build failed"
           buttons: |
@@ -225,6 +228,7 @@ jobs:
         if: failure()
         uses: ./.github/actions/google-chat-notification-action
         with:
+          webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
           title: "Android CICDTest"
           message: "Android CICDTest build failed"
           buttons: |
