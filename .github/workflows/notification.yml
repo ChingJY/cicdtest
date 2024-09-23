@@ -5,6 +5,9 @@ on:
   push:
     branches: [ 'master', 'release', 'develop' ]
 
+env:
+  WORKFLOW_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
 jobs:
     notify:
         runs-on: macos-latest
@@ -54,10 +57,8 @@ jobs:
             - name: Send failure notification to Google Chat
               if: failure()
               uses: ./.github/actions/google-chat-notification-action
-              env:
-                WORKFLOW_URL = ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
               with:
-                title: "Android VoiceTube"
-                message: "Android VoiceTube build failed"
+                title: "Android CICDTest"
+                message: "Android CICDTest build failed"
                 buttons: |
-                  前往查看::${{ env.WORKFLOW_URL }}
+                  前往查看::${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

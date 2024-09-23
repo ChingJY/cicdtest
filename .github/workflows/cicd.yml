@@ -15,6 +15,7 @@ env:
   HUAWEI_PUBLISHING_APP_ID: ${{ secrets.HUAWEI_PUBLISHING_APP_ID }}
   HUAWEI_PUBLISHING_CLIENT_ID: ${{ secrets.HUAWEI_PUBLISHING_CLIENT_ID }}
   HUAWEI_PUBLISHING_CLIENT_SECRET: ${{ secrets.HUAWEI_PUBLISHING_CLIENT_SECRET }}
+  WORKFLOW_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
 jobs:
   develop_task:
@@ -61,16 +62,14 @@ jobs:
       - name: Send success notification to Google Chat
         uses: ./.github/actions/google-chat-notification-action
         with:
-          message: "Android VoiceTube 已成功整合"
+          message: "Android CICDTest 已成功整合"
           version_name: ${{ env.VERSION_NAME }}
 
       - name: Send failure notification to Google Chat
         if: failure()
         uses: ./.github/actions/google-chat-notification-action
-        env:
-          WORKFLOW_URL = ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         with:
-          title: "Android VoiceTube"
+          title: "Android CICDTest"
           message: "Android VoiceTube build failed"
           buttons: |
             前往查看::${{ env.WORKFLOW_URL }}
@@ -136,18 +135,16 @@ jobs:
         uses: ./.github/actions/google-chat-notification-action
         with:
           webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
-          title: "Android VoiceTube"
-          message: "Android VoiceTube 已發布測試  🎉"
+          title: "Android CICDTest"
+          message: "Android CICDTest 已發布測試  🎉"
           version_name: ${{ env.VERSION_NAME }}
 
       - name: Send failure notification to Google Chat
         if: failure()
         uses: ./.github/actions/google-chat-notification-action
-        env:
-          WORKFLOW_URL = ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         with:
-          title: "Android VoiceTube"
-          message: "Android VoiceTube build failed"
+          title: "Android CICDTest"
+          message: "Android CICDTest build failed"
           buttons: |
             前往查看::${{ env.WORKFLOW_URL }}
 
@@ -215,8 +212,8 @@ jobs:
         uses: ./.github/actions/google-chat-notification-action
         with:
           webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
-          title: "Android VoiceTube"
-          message: "Android VoiceTube 已佈署至 Google Play Store (Beta)  🚀\n請相關人員注意發版"
+          title: "Android CICDTest"
+          message: "Android CICDTest 已佈署至 Google Play Store (Beta)  🚀\n請相關人員注意發版"
           version_name: ${{ env.VERSION_NAME }}
           buttons: |
             前往 Google Play Console 發版::https://play.google.com/console/u/0/developers/5409789340805974120/app/4972045572799454695/tracks/production
@@ -227,10 +224,8 @@ jobs:
       - name: Send failure notification to Google Chat
         if: failure()
         uses: ./.github/actions/google-chat-notification-action
-        env:
-          WORKFLOW_URL = ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         with:
-          title: "Android VoiceTube"
-          message: "Android VoiceTube build failed"
+          title: "Android CICDTest"
+          message: "Android CICDTest build failed"
           buttons: |
             前往查看::${{ env.WORKFLOW_URL }}
