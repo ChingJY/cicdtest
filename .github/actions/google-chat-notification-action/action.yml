@@ -83,49 +83,54 @@ runs:
         # Construct the final JSON payload
         json_payload=$(cat <<EOF
         {
-          "cardsV2": [{
-            "cardId": "unique-card-id",
-            "card": {
-              "header": {
-                "title": "$HEADER_TITLE"
-              },
-              "sections": [
-                {
-                  "widgets": [
-                    {
-                      "textParagraph": {
-                        "text": "$MESSAGE"
+          "cardsV2": [
+            {
+              "card": {
+                "header": {
+                  "title": "$HEADER_TITLE",
+                  "imageUrl": "https://cdn.voicetube.com/assets/img/app_logo/android.png",
+                  "imageType": "CIRCLE"
+                },
+                "sections": [
+                  {
+                    "collapsible": true,
+                    "uncollapsibleWidgetsCount": 4,
+                    "widgets": [
+                      {
+                        "textParagraph": {
+                          "text": "$MESSAGE"
+                        }
+                      },
+                      {
+                        "decoratedText": {
+                          "topLabel": "App Version",
+                          "text": "${VERSION_NAME:-N/A}"
+                        }
+                      },
+                      {
+                        "decoratedText": {
+                          "topLabel": "Branch",
+                          "text": "${{ github.ref_name }}"
+                        }
+                      },
+                      {
+                        "decoratedText": {
+                          "topLabel": "Author",
+                          "text": "${{ github.actor }}"
+                        }
+                      },
+                      $([ -n "$key_value_widgets" ] && echo "$key_value_widgets,")
+                      {
+                        "textParagraph": {
+                          "text": "${{ github.event.head_commit.message }}"
+                        }
                       }
-                    },
-                    {
-                      "decoratedText": {
-                        "topLabel": "App Version",
-                        "text": "${VERSION_NAME:-N/A}"
-                      }
-                    },
-                    {
-                      "decoratedText": {
-                        "topLabel": "Branch",
-                        "text": "${{ github.ref_name }}"
-                      }
-                    },
-                    {
-                      "decoratedText": {
-                        "topLabel": "Author",
-                        "text": "${{ github.actor }}"
-                      }
-                    },
-                    $([ -n "$key_value_widgets" ] && echo "$key_value_widgets,")
-                    {
-                      "textParagraph": {
-                        "text": "${{ github.event.head_commit.message }}"
-                      }
-                    }
-                  ]
-                }$button_section
-              ]
+                    ]
+                  }$button_section
+                ]
+              }
             }
-          }]
+          ]
         }
         EOF
         )
