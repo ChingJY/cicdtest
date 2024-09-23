@@ -60,4 +60,4 @@ jobs:
                 title: "Android VoiceTube"
                 message: "Android VoiceTube build failed"
                 buttons: |
-                  前往查看::${{ WORKFLOW_URL }}
+                  前往查看::${{ env.WORKFLOW_URL }}
