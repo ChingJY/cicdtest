@@ -52,7 +52,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-release.apk
-          override: true
+          overwrite: true
           path: app/build/outputs/apk/release/app-release.apk
 
       - name: Read versionInfo.txt
@@ -123,7 +123,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-release.aab
-          override: true
+          overwrite: true
           path: app/build/outputs/bundle/release/app-release.aab
 
       - name: Upload to Firebase App Distribution
@@ -188,7 +188,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-release-prd.aab
-          override: true
+          overwrite: true
           path: app/build/outputs/bundle/release/app-release.aab
 
       - name: Check if mapping.txt exists
