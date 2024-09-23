@@ -35,7 +35,7 @@ jobs:
               with:
                 webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
                 title: "Android VoiceTube"
-                message: "Android VoiceTube 已發布測試 🎉"
+                message: "Android VoiceTube 已發布測試  🎉"
                 version_name: ${{ env.VERSION_NAME }}
 
             - name: Send notification in master branch
@@ -43,10 +43,21 @@ jobs:
               with:
                 webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
                 title: "Android VoiceTube"
-                message: "Android VoiceTube 已佈署至 Google Play Store (Beta) 🚀\n請相關人員注意發版"
+                message: "Android VoiceTube 已佈署至 Google Play Store (Beta)  🚀\n請相關人員注意發版"
                 version_name: ${{ env.VERSION_NAME }}
                 buttons: |
                     前往 Google Play Console 發版::https://play.google.com/console/u/0/developers/5409789340805974120/app/4972045572799454695/tracks/production
                     前往 AppGallery Connect 發版::https://developer.huawei.com/consumer/cn/service/josp/agc/index.html#/myApp
                     Edit Release Note::https://docs.google.com/spreadsheets/d/1C3-ohBrzsYCMyzzxnY3yis9Fuh84ibge-8M0mAnW1jg/edit#gid=1410907833
                     前往 Remote Config 強制更版::https://console.firebase.google.com/u/0/project/lithe-window-713/config
+
+            - name: Send failure notification to Google Chat
+              if: failure()
+              uses: ./.github/actions/google-chat-notification-action
+              env:
+                WORKFLOW_URL = ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+              with:
+                title: "Android VoiceTube"
+                message: "Android VoiceTube build failed"
+                buttons: |
+                  前往查看::${{ WORKFLOW_URL }}
