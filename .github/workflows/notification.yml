@@ -12,55 +12,55 @@ jobs:
     notify:
         runs-on: macos-latest
         steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
+          - name: Checkout code
+            uses: actions/checkout@v4
 
-            - name: Read versionInfo.txt
-              id: read_version
-              run: echo "VERSION_NAME=v4.3.5.0928" >> $GITHUB_ENV
+          - name: Read versionInfo.txt
+            id: read_version
+            run: echo "VERSION_NAME=v4.3.5.0928" >> $GITHUB_ENV
 
-            - name: Send notification in develop branch
-              uses: ./.github/actions/google-chat-notification-action
-              with:
-                webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
-                title: "Android VoiceTube"
-                message: "Android VoiceTube 已成功整合"
-                version_name: ${{ env.VERSION_NAME }}
-                key_value_pairs: |
-                  AppVersion=${{ env.VERSION_NAME }}
-                  Branch=${{ github.ref_name }}
-                  Author=${{ github.actor }}
-                buttons: |
-                  View on GitHub::https://github.com/sashakavun/android-ci-cd
+          - name: Send notification in develop branch
+            uses: ./.github/actions/google-chat-notification-action
+            with:
+              webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
+              title: "Android VoiceTube"
+              message: "Android VoiceTube 已成功整合"
+              version_name: ${{ env.VERSION_NAME }}
+              key_value_pairs: |
+                AppVersion=${{ env.VERSION_NAME }}
+                Branch=${{ github.ref_name }}
+                Author=${{ github.actor }}
+              buttons: |
+                View on GitHub::https://github.com/sashakavun/android-ci-cd
 
-            - name: Send notification in release branch
-              uses: ./.github/actions/google-chat-notification-action
-              with:
-                webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
-                title: "Android VoiceTube"
-                message: "Android VoiceTube 已發布測試  🎉"
-                version_name: ${{ env.VERSION_NAME }}
+          - name: Send notification in release branch
+            uses: ./.github/actions/google-chat-notification-action
+            with:
+              webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
+              title: "Android VoiceTube"
+              message: "Android VoiceTube 已發布測試  🎉"
+              version_name: ${{ env.VERSION_NAME }}
 
-            - name: Send notification in master branch
-              uses: ./.github/actions/google-chat-notification-action
-              with:
-                webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
-                title: "Android VoiceTube"
-                message: "Android VoiceTube 已佈署至 Google Play Store (Beta)  🚀\n請相關人員注意發版"
-                version_name: ${{ env.VERSION_NAME }}
-                buttons: |
-                    前往 Google Play Console 發版::https://play.google.com/console/u/0/developers/5409789340805974120/app/4972045572799454695/tracks/production
-                    前往 AppGallery Connect 發版::https://developer.huawei.com/consumer/cn/service/josp/agc/index.html#/myApp
-                    Edit Release Note::https://docs.google.com/spreadsheets/d/1C3-ohBrzsYCMyzzxnY3yis9Fuh84ibge-8M0mAnW1jg/edit#gid=1410907833
-                    前往 Remote Config 強制更版::https://console.firebase.google.com/u/0/project/lithe-window-713/config
+          - name: Send notification in master branch
+            uses: ./.github/actions/google-chat-notification-action
+            with:
+              webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
+              title: "Android CICDTest"
+              message: "Android CICDTest 已佈署至 Google Play Store (Beta)  🚀\n請相關人員注意發版"
+              version_name: ${{ env.VERSION_NAME }}
+              buttons: |
+                前往 Google Play Console 發版::https://play.google.com/console/u/0/developers/5409789340805974120/app/4972045572799454695/tracks/production
+                前往 AppGallery Connect 發版::https://developer.huawei.com/consumer/cn/service/josp/agc/index.html#/myApp
+                Edit Release Note::https://docs.google.com/spreadsheets/d/1C3-ohBrzsYCMyzzxnY3yis9Fuh84ibge-8M0mAnW1jg/edit#gid=1410907833
+                前往 Remote Config 強制更版::https://console.firebase.google.com/u/0/project/lithe-window-713/config
 
-            - name: Send failure notification to Google Chat
-              if: failure()
-              uses: ./.github/actions/google-chat-notification-action
-              with:
-                webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
-                title: "Android CICDTest"
-                message: "Android CICDTest build failed"
-                version_name: ${{ env.VERSION_NAME }}
-                buttons: |
-                  前往查看::${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          - name: Send failure notification to Google Chat
+            if: failure()
+            uses: ./.github/actions/google-chat-notification-action
+            with:
+              webhook_url: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
+              title: "Android CICDTest"
+              message: "Android CICDTest build failed"
+              version_name: ${{ env.VERSION_NAME }}
+              buttons: |
+                前往查看::${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
