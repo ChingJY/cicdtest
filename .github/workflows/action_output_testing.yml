@@ -20,3 +20,6 @@ jobs:
 
       - name: show greeting
         run: echo "greeting：${{ steps.hello.outputs.greeting }}"
+
+      - name: show greeting
+        run: echo "greeting：${{ GITHUB_OUTPUT.greeting }}"
