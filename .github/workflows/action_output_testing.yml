@@ -9,7 +9,7 @@ jobs:
   greet:
     runs-on: macos-latest
     steps:
-      - name: Check out code
+      - name: Check out project
         uses: actions/checkout@v4
 
       - name: run Hello World Action
