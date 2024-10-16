@@ -1,0 +1,18 @@
+# .github/actions/hello-world-action/action.yml
+name: "Hello World Action"
+description: "A custom Action that outputs a greeting"
+inputs:
+  username:
+    description: "Username to greet"
+    required: true
+    default: "User"
+outputs:
+  greeting:
+    value: String
+    description: "a greeting"
+runs:
+  using: "composite"
+  steps:
+    - name: output a greeting
+      shell: bash
+      run: echo "greeting=${{ inputs.username }} 說：Hello world" >> $GITHUB_OUTPUT
